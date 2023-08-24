@@ -1,16 +1,21 @@
-import PropTypes from 'prop-types';
 import { useState } from 'react';
 import { Formik, Form } from 'formik';
+import { useDispatch, useSelector } from 'react-redux';
 
 import { InputField } from 'components/InputField/InputField';
 
 import { validateName, validateNumber } from 'js/validation/validation';
 
+import { addContact } from 'redux/contactsSlice';
+import { getContactList } from 'redux/selectors';
+import { isOnList } from 'js/utils/isOnList';
 import style from './ContactForm.module.css';
 
-export const ContactForm = ({ onAddContact }) => {
+export const ContactForm = () => {
   const [name, setName] = useState('');
   const [number, setNumber] = useState('');
+  const dispatch = useDispatch();
+  const contactList = useSelector(getContactList);
 
   const resetInputs = () => {
     setName('');
@@ -29,11 +34,10 @@ export const ContactForm = ({ onAddContact }) => {
 
   const handleSubmit = e => {
     e.preventDefault();
-    if (!canBeSubmitted()) {
-      return;
+    if (isOnList(contactList, name)) {
+      return alert('Contact with this name already in list');
     }
-    const contact = { name, number };
-    onAddContact(contact);
+    dispatch(addContact(name, number));
     resetInputs();
   };
 
@@ -46,7 +50,7 @@ export const ContactForm = ({ onAddContact }) => {
       }}
     >
       {({ errors }) => (
-        <Form className={style.contact__form}>
+        <Form onSubmit={handleSubmit} className={style.contact__form}>
           <label className={style.contact__label}>
             Name
             <InputField
@@ -75,18 +79,11 @@ export const ContactForm = ({ onAddContact }) => {
               validateOnChange={true}
             />
           </label>
-          <button
-            onClick={handleSubmit}
-            disabled={!canBeSubmitted()}
-            type="submit"
-          >
+          <button disabled={!canBeSubmitted()} type="submit">
             Add contact
           </button>
         </Form>
       )}
     </Formik>
   );
-};
-ContactForm.propTypes = {
-  onAddContact: PropTypes.func.isRequired,
 };

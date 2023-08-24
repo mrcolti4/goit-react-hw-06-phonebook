@@ -1,6 +1,5 @@
-export function isOnList(list, value) {
-  const arr = list.map(item => item.name);
-  return arr.some(element => {
-    return element === value;
-  });
+export function isOnList(list = [], value) {
+  const isOnList = list.findIndex(item => item.name === value);
+
+  return isOnList !== -1;
 }
